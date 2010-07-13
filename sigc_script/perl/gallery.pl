@@ -44,19 +44,22 @@
 ###############################################################################
 ################################ Use modules ##################################
 ###############################################################################
-use warnings;
+#use warnings;
 use 5.010;
-use Getopt::Long;
+use Getopt::Long qw(:config no_ignore_case bundling);
 ###############################################################################
 
 
 ###############################################################################
 ################################ "Global" variables ###########################
 ###############################################################################
-####FILE SETTINGS####
+#### SCRIPT VERSION ####
+$REVISION=0.5;
+
+#### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
 
-####GALLERY SETTINGS####
+#### GALLERY SETTINGS ####
 $CAPTIONS = 0;
 $TITLE = undef;
 $GENERATE_TITLE = 0;
@@ -65,18 +68,18 @@ $LIGHTBOX = 0;
 $LIGHTBOX_GROUP = 0;
 $DESCRIPTION = undef;
 
-#####HTML SETTINGS####
+##### HTML SETTINGS ####
 $FULL_HTML = 0;
 $HTML4 = "HTML4.01";
 $XHTML1 = "XHTML1.0";
 $XHTML11 = "XHTML1.1";
 
-####IMAGE SETTINGS####
+#### IMAGE SETTINGS ####
 $THUMB_PIXELS = 128;
 $BIG_PIXELS = 640;
 @IMAGES = undef;
 
-####SCRIPT SETTINGS####
+#### SCRIPT SETTINGS ####
 $QUIET = 0;
 $EXIT_STATUS = 0;
 $EXIT_REASON = undef;
@@ -84,7 +87,7 @@ $SEARCH_PATH = undef;
 $HELP = 0;
 $VERSION = 0;
 
-####DIRECTORIES & FILES####
+#### DIRECTORIES & FILES ####
 $ROOT = "";
 $THUMBS = "$ROOT/thumbs";
 $BIGS = "$ROOT/bigs";
@@ -112,8 +115,8 @@ sub cleanup{
 ###############################################################################
 ################################ Help Function ################################
 ###############################################################################
-sub help{
-	#Do nothing so far
+sub usage(){
+	say "HELLO!";
 }
 
 ###############################################################################
@@ -134,26 +137,67 @@ sub help{
 ###############################################################################
 
 #### Collect arguments ####
-GetOptions('B|big_size=s' => \$BIG_PIXELS);
-GetOptions('c|columns:i' => \$COLUMNS);
-GetOptions('C|captions' => \$CAPTIONS);
-GetOptions('d|gallery_directory=s' => \$DIRECTORY);
-GetOptions('D|description_location=s' => \$DESCRIPTION);
-GetOptions('description_file=s' => \$DESCRIPTION_FILE);
-GetOptions('e|extention=s' => \$INDEX_EXTENTION);
-GetOptions('h|help|?' => \$HELP);
-GetOptions('H|standalone_html_version=s' => \$FULL_HTML);
-GetOptions('l' => \$LIGHTBOX);
-GetOptions('L' => \$LIGHTBOX_GROUP);
-GetOptions('q|quiet' => \$QUIET);
-GetOptions('r|relative_to=s' => \$RELATIVE);
-GetOptions('s|source_directory=s' => \$SOURCE);
-GetOptions('S|thumb_size=i' => \$THUMB_PIXELS);
-GetOptions('t=s' => \$TITLE);
-GetOptions('T' => \$GENERATE_TITLE);
-GetOptions('V' => \$VERSION);
+
+	GetOptions(
+		'B|big_size=s' => \$BIG_PIXELS,
+		'c|columns:i' => \$COLUMNS,
+		'C|captions' => \$CAPTIONS,
+		'd|gallery_directory=s' => \$DIRECTORY,
+		'D|description_location=s' => \$DESCRIPTION,
+		'description_file=s' => \$DESCRIPTION_FILE,
+		'e|extention=s' => \$INDEX_EXTENTION,
+		'h|help|?' => \$HELP,
+		'H|standalone_html_version=s' => \$FULL_HTML,
+		'l' => \$LIGHTBOX,
+		'L' => \$LIGHTBOX_GROUP,
+		'q|quiet' => \$QUIET,
+		'r|relative_to=s' => \$RELATIVE,
+		's|source_directory=s' => \$SOURCE,
+		'S|thumb_size=i' => \$THUMB_PIXELS,
+		't=s' => \$TITLE,
+		'T' => \$GENERATE_TITLE,
+		'V|version' => \$VERSION
+	);
+
 
 #### Check arguments ####
+&usage() and exit if $HELP;
+say "Current version is $REVISION" and exit if $VERSION;
+die "The gallery directory was no specified.  Stopped" unless $DIRECTORY;
+die "The gallery directory ($DIRECTORY) was not found, or it is not a directory.  Stopped" unless -d $DIRECTORY;
+
+# Shave off any slashes at the end of the path
+$DIRECTORY =~  s/\/$//;
+$SOURCE =~  s/\/$// unless -d $SOURCE;
+$RELATIVE =~  s/\/$// unless -e $RELATIVE;
+
+# If user specified a title and told the script to generate a title 
+# just take the title the user gave us and ignor the generation.
+if($TITLE && $GENERATE_TITLE){
+	$GENERATE_TITLE = 0;
+}
+
+# If LIGHTBOX_GROUP is set, we will group images by gallery name
+# But only if TITLE has a non-zero value or a title is going to be generated
+if($LIGHTBOX_GROUP){
+	die "You have requested to group lightbox images, but have not provided a title or requested one to be auto-generated." unless $TITLE or $GENERATE_TITLE;
+}
+
+# Check user specified a correct HTML version
+if($FULL_HTML){
+	die "You have specified an unknown HTML version.  Valid versions are: $HTML4, $XHTML1, and $XHTML11." unless $FULL_HTML eq $HTML4 or $FULL_HTML eq $XHTML1 or $FULL_HTML eq $XHTML11;
+}
+
+# If user specifies full html, AND they ask for Lightbox, we'll throw an error.
+# This combination is CURRENTLY unsupported
+die "You have asked the script to create a standalone gallery page WITH lightbox capabilities.  This combination is UNSUPPORTED at this time." if $FULL_HTML and ($LIGHTBOX or $LIGHTBOX_GROUP);
+
+# Check user specified a correct position for the decription
+if($DESCRIPTION){
+	die "There is no description file.  Please create the description file under $DIRECTORY/description.txt." unless -f $DIRECTORY . "/description.txt";
+	die "You have specified an unknown location for the description text.  Valid locations are 'above' and 'below'." unless $DESCRIPTION eq "above" or $DESCRIPTION eq "below";
+}
+
 #### Check directories ####
 #### Create bigs, thumbs & .store directories ####
 #### Sort images into directories ####
