@@ -54,7 +54,7 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.9';
+$REVISION = '0.10';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -88,17 +88,17 @@ $HELP = 0;
 $VERSION = 0;
 
 #### DIRECTORIES & FILES ####
-$ROOT = "";
-$THUMBS = "$ROOT/thumbs";
-$BIGS = "$ROOT/bigs";
-$INDEX_FILE = "index.$INDEX_EXTENTION";
-$INDEX = "$ROOT/$INDEX_FILE";
-$NEWPATH = "";
-$SOURCE = "";
-$RELATIVE = "";
-$DIRECTORY = "";
-$DESCRIPTION_FILE = "$ROOT/description.txt";
-$STORE = "$ROOT/.store";
+$ROOT = undef;
+$THUMBS = undef;
+$BIGS = undef;
+$INDEX_FILE = undef;
+$INDEX = undef;
+$NEWPATH = undef;
+$SOURCE = undef;
+$RELATIVE = undef;
+$DIRECTORY = undef;
+$DESCRIPTION_FILE = undef;
+$STORE = undef;
 ###############################################################################
 
 
@@ -212,8 +212,23 @@ if($RELATIVE){
 	die "Relavite directory ($RELATIVE) does not exist.  Stopped" unless -d $RELATIVE;
 }
 
-############ Create bigs, thumbs & .store directories ############
+############ Populate variables with stuff ############
+$ROOT = "$DIRECTORY";
+$THUMBS = "$ROOT/thumbs";
+$BIGS = "$ROOT/bigs";
+$STORE = "$ROOT/.store";
+$INDEX_FILE = "index.$INDEX_EXTENTION";
+$INDEX = "$ROOT/$INDEX_FILE";
+$DESCRIPTION_FILE = "$ROOT/description.txt" unless $DESCRIPTION_FILE;
+
+############ Create directories ############
+mkdir $THUMBS;
+mkdir $BIGS;
+mkdir $STORE;
+
 ############ Sort images into directories ############
+
+
 ############ Resize images ############
 ############ Generate index file ############
 ############ Print index file ############
