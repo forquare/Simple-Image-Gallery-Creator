@@ -47,6 +47,7 @@
 #use warnings;
 use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
+use Perl::Version;
 ###############################################################################
 
 
@@ -54,7 +55,7 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION=0.7;
+$REVISION = Perl::Version->new( '0.8' );
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
