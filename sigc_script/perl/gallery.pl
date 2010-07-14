@@ -54,7 +54,7 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION=0.5;
+$REVISION=0.7;
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -116,7 +116,7 @@ sub cleanup{
 ################################ Help Function ################################
 ###############################################################################
 sub usage(){
-	say "HELLO!";
+	say "DON'T PANIC!";
 }
 
 ###############################################################################
@@ -136,7 +136,7 @@ sub usage(){
 #/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\MAIN/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/#
 ###############################################################################
 
-#### Collect arguments ####
+############ Collect arguments ############
 
 	GetOptions(
 		'B|big_size=s' => \$BIG_PIXELS,
@@ -160,16 +160,18 @@ sub usage(){
 	);
 
 
-#### Check arguments ####
+############ Check arguments ############
 &usage() and exit if $HELP;
 say "Current version is $REVISION" and exit if $VERSION;
+
+# Check the gallery directory first.  If it's not there, why continue?
 die "The gallery directory was no specified.  Stopped" unless $DIRECTORY;
 die "The gallery directory ($DIRECTORY) was not found, or it is not a directory.  Stopped" unless -d $DIRECTORY;
 
 # Shave off any slashes at the end of the path
 $DIRECTORY =~  s/\/$//;
-$SOURCE =~  s/\/$// unless -d $SOURCE;
-$RELATIVE =~  s/\/$// unless -e $RELATIVE;
+$SOURCE =~  s/\/$// if $SOURCE;
+$RELATIVE =~  s/\/$// if $RELATIVE;
 
 # If user specified a title and told the script to generate a title 
 # just take the title the user gave us and ignor the generation.
@@ -180,28 +182,39 @@ if($TITLE && $GENERATE_TITLE){
 # If LIGHTBOX_GROUP is set, we will group images by gallery name
 # But only if TITLE has a non-zero value or a title is going to be generated
 if($LIGHTBOX_GROUP){
-	die "You have requested to group lightbox images, but have not provided a title or requested one to be auto-generated." unless $TITLE or $GENERATE_TITLE;
+	die "You have requested to group lightbox images, but have not provided a title or requested one to be auto-generated.  Stopped" unless $TITLE or $GENERATE_TITLE;
 }
 
 # Check user specified a correct HTML version
 if($FULL_HTML){
-	die "You have specified an unknown HTML version.  Valid versions are: $HTML4, $XHTML1, and $XHTML11." unless $FULL_HTML eq $HTML4 or $FULL_HTML eq $XHTML1 or $FULL_HTML eq $XHTML11;
+	die "You have specified an unknown HTML version.  Valid versions are: $HTML4, $XHTML1, and $XHTML11.  Stopped" unless $FULL_HTML eq $HTML4 or $FULL_HTML eq $XHTML1 or $FULL_HTML eq $XHTML11;
 }
 
 # If user specifies full html, AND they ask for Lightbox, we'll throw an error.
 # This combination is CURRENTLY unsupported
-die "You have asked the script to create a standalone gallery page WITH lightbox capabilities.  This combination is UNSUPPORTED at this time." if $FULL_HTML and ($LIGHTBOX or $LIGHTBOX_GROUP);
+die "You have asked the script to create a standalone gallery page WITH lightbox capabilities.  This combination is UNSUPPORTED at this time.  Stopped" if $FULL_HTML and ($LIGHTBOX or $LIGHTBOX_GROUP);
 
 # Check user specified a correct position for the decription
 if($DESCRIPTION){
-	die "There is no description file.  Please create the description file under $DIRECTORY/description.txt." unless -f $DIRECTORY . "/description.txt";
-	die "You have specified an unknown location for the description text.  Valid locations are 'above' and 'below'." unless $DESCRIPTION eq "above" or $DESCRIPTION eq "below";
+	die "There is no description file.  Please create the description file under $DIRECTORY/description.txt.  Stopped" unless -f $DIRECTORY . "/description.txt";
+	die "You have specified an unknown location for the description text.  Valid locations are 'above' and 'below'.  Stopped" unless $DESCRIPTION eq "above" or $DESCRIPTION eq "below";
 }
 
-#### Check directories ####
-#### Create bigs, thumbs & .store directories ####
-#### Sort images into directories ####
-#### Resize images ####
-#### Generate index file ####
-#### Print index file ####
-#### Cleanup ####
+############ Check directories ############
+## Check SOURCE directory if specified
+if($SOURCE){
+	die "Source directory and destination directory are the same.  Stopped" if $SOURCE eq $DIRECTORY;
+	die "Source directory ($SOURCE) does not exist.  Stopped" unless -d $SOURCE;
+}
+
+## Check RELATIVE directory if specified
+if($RELATIVE){
+	die "Relavite directory ($RELATIVE) does not exist.  Stopped" unless -d $RELATIVE;
+}
+
+############ Create bigs, thumbs & .store directories ############
+############ Sort images into directories ############
+############ Resize images ############
+############ Generate index file ############
+############ Print index file ############
+############ Cleanup ############
