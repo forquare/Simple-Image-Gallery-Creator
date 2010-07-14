@@ -47,7 +47,6 @@
 #use warnings;
 use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
-use Perl::Version;
 ###############################################################################
 
 
@@ -55,7 +54,7 @@ use Perl::Version;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = Perl::Version->new( '0.8' );
+$REVISION = '0.9';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -163,7 +162,7 @@ sub usage(){
 
 ############ Check arguments ############
 &usage() and exit if $HELP;
-say "Current version is $REVISION" and exit if $VERSION;
+say "You are running v$REVISION" and exit if $VERSION;
 
 # Check the gallery directory first.  If it's not there, why continue?
 die "The gallery directory was no specified.  Stopped" unless $DIRECTORY;
