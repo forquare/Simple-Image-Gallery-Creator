@@ -47,6 +47,8 @@
 #use warnings;
 use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
+use File::Copy;
+use File::Basename;
 ###############################################################################
 
 
@@ -54,7 +56,7 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.10';
+$REVISION = '0.11';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -227,7 +229,19 @@ mkdir $BIGS;
 mkdir $STORE;
 
 ############ Sort images into directories ############
-
+if($SOURCE){
+	opendir(SOURCEHANDLE,"$SOURCE") or die "Cannot open $SOURCE.  Stopped";
+	@files = sort readdir(SOURCEHANDLE);
+	close(SOURCEHANDLE);
+	foreach $file (@files){
+		my $ext = ($file =~ m/([^.]+)$/)[0];
+		if($file =~ /png/i || $file =~ /jpeg/i || $file =~ /jpg/i || $file =~ /gif/i || $file =~ /tif/i || $file =~ /bmp/i){
+			my $oldfile = "$SOURCE/$file";
+			my $newfile = "$DIRECTORY/$file";
+			copy($oldfile, $newfile);
+		}
+	}
+}
 
 ############ Resize images ############
 ############ Generate index file ############
