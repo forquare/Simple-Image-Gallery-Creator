@@ -56,7 +56,7 @@ use File::Basename;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.11';
+$REVISION = '0.12';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -229,19 +229,38 @@ mkdir $BIGS;
 mkdir $STORE;
 
 ############ Sort images into directories ############
+## If a source directory exists, copy any _IMAGE_ files accross.
 if($SOURCE){
 	opendir(SOURCEHANDLE,"$SOURCE") or die "Cannot open $SOURCE.  Stopped";
-	@files = sort readdir(SOURCEHANDLE);
+	my @files = sort readdir(SOURCEHANDLE);
 	close(SOURCEHANDLE);
 	foreach $file (@files){
-		my $ext = ($file =~ m/([^.]+)$/)[0];
 		if($file =~ /png/i || $file =~ /jpeg/i || $file =~ /jpg/i || $file =~ /gif/i || $file =~ /tif/i || $file =~ /bmp/i){
 			my $oldfile = "$SOURCE/$file";
-			my $newfile = "$DIRECTORY/$file";
+			my $newfile = "$ROOT/$file";
 			copy($oldfile, $newfile);
 		}
 	}
 }
+
+## Copy images into BIGS and THUMBS, move them into .store
+opendir(ROOTHANDLE,"$ROOT") or die "Cannot open $ROOT.  Stopped";
+my @images = sort readdir(ROOTHANDLE);
+close(ROOTHANDLE);
+foreach $image (@images){
+	if($image =~ /png/i || $image =~ /jpeg/i || $image =~ /jpg/i || $image =~ /gif/i || $image =~ /tif/i || $image =~ /bmp/i){
+		say "HERE";
+		my $oldimage = "$ROOT/$image";
+		my $bigimage = "$BIGS/$image";
+		my $thumbimage = "$THUMBS/$image";
+		my $storedimage = "$STORE/$image";
+		
+		copy($oldimage, $bigimage);
+		copy($oldimage, $thumbimage);
+		rename($oldimage, $storedimage);
+	}
+}
+
 
 ############ Resize images ############
 ############ Generate index file ############
