@@ -58,7 +58,7 @@ use Image::Magick;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.14';
+$REVISION = '0.15';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -192,6 +192,10 @@ sub resize(){ #Should see an image, path and the desired width or height passed 
 &usage() and exit if $HELP;
 say "You are running v$REVISION" and exit if $VERSION;
 
+unless($QUIET){
+	say "Checking arguments.";
+}
+
 # Check the gallery directory first.  If it's not there, why continue?
 die "The gallery directory was no specified.  Stopped" unless $DIRECTORY;
 die "The gallery directory ($DIRECTORY) was not found, or it is not a directory.  Stopped" unless -d $DIRECTORY;
@@ -229,6 +233,10 @@ if($DESCRIPTION){
 }
 
 ############ Check directories ############
+unless($QUIET){
+	say "Checking directories.";
+}
+
 ## Check SOURCE directory if specified
 if($SOURCE){
 	die "Source directory and destination directory are the same.  Stopped" if $SOURCE eq $DIRECTORY;
@@ -241,6 +249,9 @@ if($RELATIVE){
 }
 
 ############ Populate variables with stuff ############
+unless($QUIET){
+	say "Populating some variables.";
+}
 $ROOT = "$DIRECTORY";
 $THUMBS = "$ROOT/thumbs";
 $BIGS = "$ROOT/bigs";
@@ -250,26 +261,45 @@ $INDEX = "$ROOT/$INDEX_FILE";
 $DESCRIPTION_FILE = "$ROOT/description.txt" unless $DESCRIPTION_FILE;
 
 ############ Create directories ############
+unless($QUIET){
+	say "Creating directories:\n\t$THUMBS,\n\t$BIGS,\n\t$STORE\n";
+}
 mkdir $THUMBS;
 mkdir $BIGS;
 mkdir $STORE;
 
 ############ Sort images into directories ############
+unless($QUIET){
+	say "Checking for the sourcedirectory.";
+}
 ## If a source directory exists, copy any _IMAGE_ files accross.
 if($SOURCE){
 	opendir(SOURCEHANDLE,"$SOURCE") or die "Cannot open $SOURCE.  Stopped";
 	my @files = sort readdir(SOURCEHANDLE);
 	close(SOURCEHANDLE);
+	
+	unless($QUIET){
+		say "Source directory found.";
+	}
+	
 	foreach $file (@files){
 		if($file =~ /png/i || $file =~ /jpeg/i || $file =~ /jpg/i || $file =~ /gif/i || $file =~ /tif/i || $file =~ /bmp/i){
 			my $oldfile = "$SOURCE/$file";
 			my $newfile = "$ROOT/$file";
 			copy($oldfile, $newfile);
+			
+			unless($QUIET){
+				say "Just copied $oldfile to $newfile";
+			}
 		}
 	}
 }
 
 ## Copy images into BIGS and THUMBS, move them into .store
+unless($QUIET){
+	say "Copying images into directories.";
+}
+
 opendir(ROOTHANDLE,"$ROOT") or die "Cannot open $ROOT.  Stopped";
 @images = sort readdir(ROOTHANDLE);
 close(ROOTHANDLE);
@@ -281,33 +311,61 @@ foreach $image (@images){
 		my $thumbimage = "$THUMBS/$image";
 		my $storedimage = "$STORE/$image";
 		
+		unless($QUIET){
+			say "Copying $bigimage.";
+		}
 		copy($oldimage, $bigimage);
+		
+		unless($QUIET){
+			say "Copying $thumbimage";
+		}
 		copy($oldimage, $thumbimage);
+		
+		unless($QUIET){
+			say "Moving $storedimage";
+		}
 		rename($oldimage, $storedimage);
 	}
 }
 
 ## This gets all of the images which we can use for processing later.  
 ## Note that it only constains the image name, not the path
+unless($QUIET){
+	say "Gathering a list of your images.";
+}
 opendir(BIGHANDLE,"$BIGS") or die "Cannot open $BIGS.  Stopped";
 @IMAGES = sort readdir(BIGHANDLE);
 close(BIGHANDLE);
-
+unless($QUIET){
+	say "Images collected.";
+}
 
 ############ Resize images ############
+unless($QUIET){
+	say "Resizing images";
+}
 foreach $image (@images){
 	my $bigimage = "$BIGS/$image";
 	my $thumbimage = "$THUMBS/$image";
 	
 	$PWI->Read("$bigimage");
 	&resize($PWI, $bigimage, $BIG_PIXELS);
+	unless($QUIET){
+		say "Just resized $bigimage";
+	}
 	
 	$PWI->Read("$thumbimage");
 	&resize($PWI, $thumbimage, $THUMB_PIXELS);
+	unless($QUIET){
+		say "Just resized $thumbimage";
+	}
 }
 
 
 ############ Generate index file ############
+unless($QUIET){
+	say "Generating the index file.";
+}
 ## This header is printed at the top of the file to show what version it is running
 $scriptheader = "<!-- DO NOT DELETE THESE COMMENTS AS THEY MAY BE USED IN THE FUTURE TO UPDATE THE GALLERY WITH NEW FEATURES/FIXES -->
 <!-- This gallery was created using the gallery script which can be found here: https://code.google.com/p/simple-image-gallery-creator/ -->
@@ -423,9 +481,19 @@ if($FULL_HTML){
 }
 
 ############ Print index file ############
+unless($QUIET){
+	say "Printing the index file";
+}
 open(INDEXFILEHANDLE, ">", "$INDEX_FILE") or die "Cannot open $INDEX_FILE.  Stopped";
 print INDEXFILEHANDLE "$markup";
 close(INDEXFILEHANDLE);
 
 ############ Cleanup ############
+unless($QUIET){
+	say "Cleaning up.";
+}
 &cleanup();
+
+unless($QUIET){
+	say "Done :)\a";
+}
