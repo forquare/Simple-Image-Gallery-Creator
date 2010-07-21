@@ -49,6 +49,7 @@ use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
 use File::Copy;
 use File::Basename;
+use Image::Magick;
 ###############################################################################
 
 
@@ -56,7 +57,7 @@ use File::Basename;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.12';
+$REVISION = '0.13';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -80,6 +81,7 @@ $XHTML11 = "XHTML1.1";
 $THUMB_PIXELS = 128;
 $BIG_PIXELS = 640;
 @IMAGES = undef;
+$PWI = new Image::Magick; #Present Working Image
 
 #### SCRIPT SETTINGS ####
 $QUIET = 0;
@@ -108,9 +110,8 @@ $STORE = undef;
 ################################ Cleanup Function #############################
 ###############################################################################
 sub cleanup{
-	#Do nothing so far
+	say "Clean it yourself";
 }
-
 ###############################################################################
 
 
@@ -120,7 +121,30 @@ sub cleanup{
 sub usage(){
 	say "DON'T PANIC!";
 }
+###############################################################################
 
+
+###############################################################################
+################################ Resize Function ##############################
+###############################################################################
+sub resize(){ #Should see an image, path and the desired width or height passed in.
+	my $image = @_[0];
+	my $path = @_[1];
+	my $longestside = @_[2];
+	
+	my $height = $image->Get('height');
+	my $width = $image->Get('width');
+	
+	if($width > $height){
+		$image->Resize(width=>"$longside") if $width > $longside;
+	}
+	
+	if($height > $width){
+		$image->Resize(height=>"$longside") if $height > $longside;
+	}
+	
+	$image->Write("$path");
+}
 ###############################################################################
 
 
@@ -245,7 +269,7 @@ if($SOURCE){
 
 ## Copy images into BIGS and THUMBS, move them into .store
 opendir(ROOTHANDLE,"$ROOT") or die "Cannot open $ROOT.  Stopped";
-my @images = sort readdir(ROOTHANDLE);
+@images = sort readdir(ROOTHANDLE);
 close(ROOTHANDLE);
 foreach $image (@images){
 	if($image =~ /png/i || $image =~ /jpeg/i || $image =~ /jpg/i || $image =~ /gif/i || $image =~ /tif/i || $image =~ /bmp/i){
@@ -261,8 +285,94 @@ foreach $image (@images){
 	}
 }
 
+## This gets all of the images which we can use for processing later.  
+## Note that it only constains the image name, not the path
+opendir(BIGHANDLE,"$BIGS") or die "Cannot open $BIGS.  Stopped";
+@IMAGES = sort readdir(BIGHANDLE);
+close(BIGHANDLE);
+
 
 ############ Resize images ############
+foreach $image (@images){
+	my $bigimage = "$BIGS/$image";
+	my $thumbimage = "$THUMBS/$image";
+	
+	$PWI->Read("$bigimage");
+	&resize($PWI, $bigimage, $BIG_PIXELS);
+	
+	$PWI->Read("$thumbimage");
+	&resize($PWI, $thumbimage, $THUMB_PIXELS);
+}
+
+
 ############ Generate index file ############
+## This header is printed at the top of the file to show what version it is running
+$scriptheader = "<!-- DO NOT DELETE THESE COMMENTS AS THEY MAY BE USED IN THE FUTURE TO UPDATE THE GALLERY WITH NEW FEATURES/FIXES -->
+<!-- This gallery was created using the gallery script which can be found here: https://code.google.com/p/simple-image-gallery-creator/ -->
+<!-- Gallery script revision: $REVISION -->\n";
+
+if($FULL_HTML -eq $HTML4){
+	$htmlheader = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/html4/strict.dtd"
+	
+	<html lang="en">';
+}
+if($FULL_HTML -eq $XHTML1){
+	$htmlheader =  '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">';
+}
+if($FULL_HTML -eq $XHTML1){
+	$htmlheader = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">';
+}
+
+$htmlheader = "$htmlheader" . "\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>\n<title>$TITLE</title>\n</head>\n<body>\n\n";
+
+$markup = "$scriptheader" . "$htmlheader";
+
+if($TITLE){
+	$markup = "$markup" . "<h1>$TITLE</h1>\n\n";
+}
+
+if($DESCRIPTION -eq "above"){
+	open(DESCRIPTIONFILEHANDLE,"$DESCRIPTION_FILE") or die "Cannot open $DESCRIPTION_FILE.  Stopped";
+	while(<DESCRIPTIONFILEHANDLE>){
+		chomp;
+		$markup = "$markup" . "$_";
+	}
+	close(DESCRIPTIONFILEHANDLE);
+}
+
+$markup = "$markup" . "<dev id='gallery-body'\n\n";
+
+foreach $images (@IMAGES){
+	#Here we'll create the actual gallery
+}
+
+$markup = "$markup" . "</div>\n\n";
+
+if($DESCRIPTION -eq "below"){
+	open(DESCRIPTIONFILEHANDLE,"$DESCRIPTION_FILE") or die "Cannot open $DESCRIPTION_FILE.  Stopped";
+	while(<DESCRIPTIONFILEHANDLE>){
+		chomp;
+		$markup = "$markup" . "$_";
+	}
+	close(DESCRIPTIONFILEHANDLE);
+}
+
+if($FULL_HTML){
+	$markup = "$markup" . "</body>";
+	$markup = "$markup" . "</html>";
+}
+
 ############ Print index file ############
+open(INDEXFILEHANDLE, ">", "$INDEX_FILE") or die "Cannot open $INDEX_FILE.  Stopped";
+print INDEXFILEHANDLE "$markup";
+close(INDEXFILEHANDLE);
+
 ############ Cleanup ############
+&cleanup()
