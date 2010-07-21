@@ -49,6 +49,7 @@ use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
 use File::Copy;
 use File::Basename;
+use File::Spec;
 use Image::Magick;
 ###############################################################################
 
@@ -57,7 +58,7 @@ use Image::Magick;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.13';
+$REVISION = '0.14';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -109,8 +110,9 @@ $STORE = undef;
 ###############################################################################
 ################################ Cleanup Function #############################
 ###############################################################################
-sub cleanup{
-	say "Clean it yourself";
+sub cleanup(){
+	unlink glob "$STORE/* $STORE/.*";
+	rmdir $STORE;
 }
 ###############################################################################
 
@@ -347,10 +349,61 @@ if($DESCRIPTION -eq "above"){
 	close(DESCRIPTIONFILEHANDLE);
 }
 
-$markup = "$markup" . "<dev id='gallery-body'\n\n";
+$markup = "$markup" . "<div id='gallery-body'>\n\n";
 
-foreach $images (@IMAGES){
-	#Here we'll create the actual gallery
+$x = 0
+while($x < @IMAGES){
+	$markup = "$markup" . "<div class='gallery-column'>\n\n";
+	
+	for(my $i = 0; $i <= $COLUMNS; $i++){
+		if($x < @IMAGES){
+			last;
+		}
+		
+		$markup = "$markup" . "<div id='gallery-image'>\n\n";
+		
+		$rel_path = File::Spec->abs2rel($base, $path);
+		
+		if($RELATIVE){
+			$bigpath = File::Spec->abs2rel($BIGS, $RELATIVE);
+			$thumbpath = File::Spec->abs2rel($THUMBS, $RELATIVE);
+		}else{
+			$bigpath = $BIGS;
+			$thumbpath = $THUMBS;
+		}
+		
+		$PWI->Read("$thumbpath/@IMAGES[$x]");
+		
+		my $height = $PWI->Get('height');
+		my $width = $PWI->Get('width');
+		
+		if($width > $height){
+			$class = "class='landscape";
+		}else{
+			$class = "class='portrait";
+		}
+		
+		if($LIGHTBOX){
+			$REL = "rel='lightbox'";
+		}
+		if($LIGHTBOX_GROUP){
+			$REL = "rel='lightbox $TITLE'";
+		}
+		
+		$markup = "$markup" . "a href='$BIGPATH/@IMAGES[$x]' $REL><img $CLASS  alt='@IMAGES[$x]' src='$THUMBPATH/@IMAGES[$x]' /></a>\n";
+		
+		if($CAPTIONS){
+			my $caption = @IMAGES[$x];
+			$caption =~ s/(.*)\.([^\.]*)/$1/;
+			$markup = "$markup" . "<p class='gallery-caption'>$caption</p>\n";
+		}
+		
+		$markup = "$markup" . "</div>\n\n";
+		
+		$x++;
+	}
+	
+	$markup = "$markup" . "</div>\n\n";
 }
 
 $markup = "$markup" . "</div>\n\n";
@@ -375,4 +428,4 @@ print INDEXFILEHANDLE "$markup";
 close(INDEXFILEHANDLE);
 
 ############ Cleanup ############
-&cleanup()
+&cleanup();
