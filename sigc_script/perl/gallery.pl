@@ -44,7 +44,7 @@
 ###############################################################################
 ################################ Use modules ##################################
 ###############################################################################
-#use warnings;
+use warnings;
 use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
 use File::Copy;
@@ -58,7 +58,7 @@ use Image::Magick;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.15';
+$REVISION = '0.16';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -82,13 +82,13 @@ $XHTML11 = "XHTML1.1";
 $THUMB_PIXELS = 128;
 $BIG_PIXELS = 640;
 @IMAGES = undef;
-$PWI = new Image::Magick; #Present Working Image
+$PWI = undef; #Present Working Image
 
 #### SCRIPT SETTINGS ####
 $QUIET = 0;
-$EXIT_STATUS = 0;
-$EXIT_REASON = undef;
-$SEARCH_PATH = undef;
+#$EXIT_STATUS = 0;
+#$EXIT_REASON = undef;
+#$SEARCH_PATH = undef;
 $HELP = 0;
 $VERSION = 0;
 
@@ -98,7 +98,6 @@ $THUMBS = undef;
 $BIGS = undef;
 $INDEX_FILE = undef;
 $INDEX = undef;
-$NEWPATH = undef;
 $SOURCE = undef;
 $RELATIVE = undef;
 $DIRECTORY = undef;
@@ -121,31 +120,40 @@ sub cleanup(){
 ################################ Help Function ################################
 ###############################################################################
 sub usage(){
-	say "DON'T PANIC!";
-}
-###############################################################################
+	say "
+Usage: gallery [options] -d directory
 
-
-###############################################################################
-################################ Resize Function ##############################
-###############################################################################
-sub resize(){ #Should see an image, path and the desired width or height passed in.
-	my $image = @_[0];
-	my $path = @_[1];
-	my $longestside = @_[2];
+	-B big_image_size_in_pixels - The size of the main images.
+		The number is applied to the longest side and is measured in pixels.
+	-c - Number of columns per row.  Default is four.
+	-C - Use captions - These are generated using the file names without
+		the file extension.
+	-d directory - Absolute link to directory with images in.
+		Escape spaces with a \ symbol.
+	-D description_location - Add the description found in description.txt
+		which should be located in the directory specified with -d
+	-e - Extension for the gallery file.  Default is php.
+	-h - Show this help text.
+	-H html_version - Create a standalone HTML page.  Specify $HTML4, $XHTML1, or
+		$XHTML11 to make the script generate a standards compliant page.
+	-l - Use lightbox for displaying images.
+	-L - Use lightbox for displaying images and groupt them using gallery title.
+		For this option to work, you must either specify a title
+		or auto-generate one.
+	-q - Be quiet - suppress all output.
+	-r relative directory - Directory image links should be relative to.
+		Escape spaces with a \ symbol.
+	-s source directory - Use this directory as a source for images.
+		Images will be copied from here into the directory specified
+		using the -d option.
+	-S small_image_size_in_pixels - The size of thumbnails.
+		The number is applied to the longest side and is measured in pixels.
+	-t title - Title of the gallery.  Use quotes when using multiple words.
+	-T - Generate title based on directory name.
+	-V - Print version (revision).
 	
-	my $height = $image->Get('height');
-	my $width = $image->Get('width');
-	
-	if($width > $height){
-		$image->Resize(width=>"$longside") if $width > $longside;
-	}
-	
-	if($height > $width){
-		$image->Resize(height=>"$longside") if $height > $longside;
-	}
-	
-	$image->Write("$path");
+	NOTE: See regular documentation for more indepth help.
+";
 }
 ###############################################################################
 
@@ -259,6 +267,10 @@ $STORE = "$ROOT/.store";
 $INDEX_FILE = "index.$INDEX_EXTENTION";
 $INDEX = "$ROOT/$INDEX_FILE";
 $DESCRIPTION_FILE = "$ROOT/description.txt" unless $DESCRIPTION_FILE;
+@dirs = File::Spec->splitdir($ROOT);
+$TITLE = pop(@dirs) unless $TITLE;
+say "TAAAADAAAAAAA $TITLE";
+undef @dirs;
 
 ############ Create directories ############
 unless($QUIET){
@@ -268,7 +280,7 @@ mkdir $THUMBS;
 mkdir $BIGS;
 mkdir $STORE;
 
-############ Sort images into directories ############
+############ Sort images into directories and resize ############
 unless($QUIET){
 	say "Checking for the sourcedirectory.";
 }
@@ -296,71 +308,76 @@ if($SOURCE){
 }
 
 ## Copy images into BIGS and THUMBS, move them into .store
-unless($QUIET){
-	say "Copying images into directories.";
-}
-
-opendir(ROOTHANDLE,"$ROOT") or die "Cannot open $ROOT.  Stopped";
-@images = sort readdir(ROOTHANDLE);
-close(ROOTHANDLE);
-foreach $image (@images){
-	if($image =~ /png/i || $image =~ /jpeg/i || $image =~ /jpg/i || $image =~ /gif/i || $image =~ /tif/i || $image =~ /bmp/i){
-		say "HERE";
-		my $oldimage = "$ROOT/$image";
-		my $bigimage = "$BIGS/$image";
-		my $thumbimage = "$THUMBS/$image";
-		my $storedimage = "$STORE/$image";
-		
-		unless($QUIET){
-			say "Copying $bigimage.";
-		}
-		copy($oldimage, $bigimage);
-		
-		unless($QUIET){
-			say "Copying $thumbimage";
-		}
-		copy($oldimage, $thumbimage);
-		
-		unless($QUIET){
-			say "Moving $storedimage";
-		}
-		rename($oldimage, $storedimage);
-	}
-}
 
 ## This gets all of the images which we can use for processing later.  
 ## Note that it only constains the image name, not the path
 unless($QUIET){
 	say "Gathering a list of your images.";
 }
-opendir(BIGHANDLE,"$BIGS") or die "Cannot open $BIGS.  Stopped";
-@IMAGES = sort readdir(BIGHANDLE);
-close(BIGHANDLE);
+opendir(ROOTHANDLE,"$ROOT") or die "Cannot open $ROOT.  Stopped";
+@images = sort readdir(ROOTHANDLE);
+close(ROOTHANDLE);
+foreach $image (@images){
+	if($image =~ /png/i || $image =~ /jpeg/i || $image =~ /jpg/i || $image =~ /gif/i || $image =~ /tif/i || $image =~ /bmp/i){
+		push(@IMAGES, $image);
+	}
+}
 unless($QUIET){
 	say "Images collected.";
 }
 
-############ Resize images ############
-unless($QUIET){
-	say "Resizing images";
-}
-foreach $image (@images){
+## Take off front of array (It's empty)
+shift(@IMAGES);
+
+foreach $image (@IMAGES){
+	
+	my $oldimage = "$ROOT/$image";
 	my $bigimage = "$BIGS/$image";
 	my $thumbimage = "$THUMBS/$image";
+	my $storedimage = "$STORE/$image";
 	
-	$PWI->Read("$bigimage");
-	&resize($PWI, $bigimage, $BIG_PIXELS);
 	unless($QUIET){
-		say "Just resized $bigimage";
+		say "Copying and resizing $bigimage.";
 	}
+	$PWI = new Image::Magick;
+	$PWI->Read("$oldimage");
+	my $height = $PWI->Get('height');
+	my $width = $PWI->Get('width');
+	if($width > $height){
+		my $ratio_main = $BIG_PIXELS / $width;
+		$PWI->Resize(width=>$width * $ratio_main, height=>$height * $ratio_main) if $width > $BIG_PIXELS;
+	}
+	if($height > $width){
+		my $ratio_main = $BIG_PIXELS / $height;
+		$PWI->Resize(width=>$width * $ratio_main, height=>$height * $ratio_main) if $height > $BIG_PIXELS;
+	}
+	$PWI->Write("$bigimage");
 	
-	$PWI->Read("$thumbimage");
-	&resize($PWI, $thumbimage, $THUMB_PIXELS);
+	
 	unless($QUIET){
-		say "Just resized $thumbimage";
+		say "Copying and resizing $thumbimage.";
 	}
+	$PWI = new Image::Magick;
+	$PWI->Read("$oldimage");
+	$height = $PWI->Get('height');
+	$width = $PWI->Get('width');
+	if($width > $height){
+		my $ratio_main = $THUMB_PIXELS / $width;
+		$PWI->Resize(width=>$width * $ratio_main, height=>$height * $ratio_main) if $width > $THUMB_PIXELS;
+	}
+	if($height > $width){
+		my $ratio_main = $THUMB_PIXELS / $height;
+		$PWI->Resize(width=>$width * $ratio_main, height=>$height * $ratio_main) if $height > $THUMB_PIXELS;
+	}
+	$PWI->Write("$thumbimage");
+	
+	
+	unless($QUIET){
+		say "Moving $storedimage";
+	}
+	rename($oldimage, $storedimage);
+	
 }
-
 
 ############ Generate index file ############
 unless($QUIET){
@@ -371,26 +388,27 @@ $scriptheader = "<!-- DO NOT DELETE THESE COMMENTS AS THEY MAY BE USED IN THE FU
 <!-- This gallery was created using the gallery script which can be found here: https://code.google.com/p/simple-image-gallery-creator/ -->
 <!-- Gallery script revision: $REVISION -->\n";
 
-if($FULL_HTML -eq $HTML4){
+$htmlheader = "";
+if($FULL_HTML eq $HTML4){
 	$htmlheader = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
 	"http://www.w3.org/TR/html4/strict.dtd"
 	
 	<html lang="en">';
 }
-if($FULL_HTML -eq $XHTML1){
+if($FULL_HTML eq $XHTML1){
 	$htmlheader =  '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">';
 }
-if($FULL_HTML -eq $XHTML1){
+if($FULL_HTML eq $XHTML11){
 	$htmlheader = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">';
 }
 
-$htmlheader = "$htmlheader" . "\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>\n<title>$TITLE</title>\n</head>\n<body>\n\n";
+$htmlheader = "$htmlheader" . "\n<head>\n<meta httpequiv='Content-Type' content='text/html; charset=utf-8'/>\n<title>$TITLE</title>\n</head>\n<body>\n\n";
 
 $markup = "$scriptheader" . "$htmlheader";
 
@@ -398,7 +416,8 @@ if($TITLE){
 	$markup = "$markup" . "<h1>$TITLE</h1>\n\n";
 }
 
-if($DESCRIPTION -eq "above"){
+$DESCRIPTION = "" unless $DESCRIPTION;
+if($DESCRIPTION eq "above"){
 	open(DESCRIPTIONFILEHANDLE,"$DESCRIPTION_FILE") or die "Cannot open $DESCRIPTION_FILE.  Stopped";
 	while(<DESCRIPTIONFILEHANDLE>){
 		chomp;
@@ -409,18 +428,16 @@ if($DESCRIPTION -eq "above"){
 
 $markup = "$markup" . "<div id='gallery-body'>\n\n";
 
-$x = 0
+$x = 0;
 while($x < @IMAGES){
 	$markup = "$markup" . "<div class='gallery-column'>\n\n";
 	
 	for(my $i = 0; $i <= $COLUMNS; $i++){
-		if($x < @IMAGES){
+		if($x >= @IMAGES){
 			last;
 		}
 		
 		$markup = "$markup" . "<div id='gallery-image'>\n\n";
-		
-		$rel_path = File::Spec->abs2rel($base, $path);
 		
 		if($RELATIVE){
 			$bigpath = File::Spec->abs2rel($BIGS, $RELATIVE);
@@ -430,10 +447,13 @@ while($x < @IMAGES){
 			$thumbpath = $THUMBS;
 		}
 		
-		$PWI->Read("$thumbpath/@IMAGES[$x]");
+		$PWI = new Image::Magick;
+		$PWI->Read("$thumbpath/$IMAGES[$x]");
 		
-		my $height = $PWI->Get('height');
-		my $width = $PWI->Get('width');
+		say "$IMAGES[$x]";
+		
+		$height = $PWI->Get('height');
+		$width = $PWI->Get('width');
 		
 		if($width > $height){
 			$class = "class='landscape";
@@ -442,16 +462,16 @@ while($x < @IMAGES){
 		}
 		
 		if($LIGHTBOX){
-			$REL = "rel='lightbox'";
+			$rel = "rel='lightbox'";
 		}
 		if($LIGHTBOX_GROUP){
-			$REL = "rel='lightbox $TITLE'";
+			$rel = "rel='lightbox $TITLE'";
 		}
 		
-		$markup = "$markup" . "a href='$BIGPATH/@IMAGES[$x]' $REL><img $CLASS  alt='@IMAGES[$x]' src='$THUMBPATH/@IMAGES[$x]' /></a>\n";
+		$markup = "$markup" . "a href='$bigpath/$IMAGES[$x]' $rel><img $class  alt='$IMAGES[$x]' src='$thumbpath/$IMAGES[$x]' /></a>\n";
 		
 		if($CAPTIONS){
-			my $caption = @IMAGES[$x];
+			my $caption = $IMAGES[$x];
 			$caption =~ s/(.*)\.([^\.]*)/$1/;
 			$markup = "$markup" . "<p class='gallery-caption'>$caption</p>\n";
 		}
@@ -466,7 +486,7 @@ while($x < @IMAGES){
 
 $markup = "$markup" . "</div>\n\n";
 
-if($DESCRIPTION -eq "below"){
+if($DESCRIPTION eq "below"){
 	open(DESCRIPTIONFILEHANDLE,"$DESCRIPTION_FILE") or die "Cannot open $DESCRIPTION_FILE.  Stopped";
 	while(<DESCRIPTIONFILEHANDLE>){
 		chomp;
@@ -485,6 +505,9 @@ unless($QUIET){
 	say "Printing the index file";
 }
 open(INDEXFILEHANDLE, ">", "$INDEX_FILE") or die "Cannot open $INDEX_FILE.  Stopped";
+select INDEXFILEHANDLE;
+$| = 1;
+select STDOUT;
 print INDEXFILEHANDLE "$markup";
 close(INDEXFILEHANDLE);
 
