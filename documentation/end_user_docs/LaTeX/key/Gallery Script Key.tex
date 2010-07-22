@@ -1,0 +1,48 @@
+
+\documentclass[12pt]{amsart}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper, textwidth=21cm, textheight=26cm} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+
+% See the ``Article customise'' template for come common customisations
+
+\title{Gallery Script Key v1.0}
+\author{Ben Lavery}
+\date{\today} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+
+\begin{tabular}{|c|c|c|}
+\hline
+Short option	&	Long option				&	Description  \\ \hline \hline
+										
+-B			&	--big\_size					&	Specify the size of the large image. \\ \hline
+-c			&	--columns					&	Number of images per row. \\ \hline
+-C			&	--captions					&	Turn captions on (auto-generated from file name). \\ \hline
+-d			&	--gallery\_directory			&	Location of the directory the gallery will be created. \\ \hline
+-D			&	--description\_location		&	Whether the description should appear {\textit{above}} or {\textit{below}} the images. \\ \hline
+			&	--description\_file			&	Specify a file where the description text can be found. \\ \hline
+-e			&	--extension				&	Specify an extension for the index file (e.g. php or html). \\ \hline
+-h or -?		&	--help					&	Prints a key similar to this. \\ \hline
+-H			&	--standalone\_html\_version	&	Specify a standalone HTML version. \\ \hline
+-l			&							&	Use LightBox2. \\ \hline
+-L			&							&	Use LightBox2 with groups. \\ \hline
+-q			&	--quiet					&	Suppress output. \\ \hline
+-r			&	--relative\_to				&	Specify a location that image links should be relative to. \\ \hline
+-s			&	--source\_directory			&	Specify a source directory that images should be copied from. \\ \hline
+-S			&	--thumb\_size				&	Specify the size of the thumbnails. \\ \hline
+-t			&							&	Specify a title for the gallery. \\ \hline
+-T			&							&	Generate title for gallery from directory name. \\ \hline
+-V			&	--version					&	Prints the version of the script.\\ \hline
+
+
+\end{tabular}
+
+
+
+
+
+\end{document}
