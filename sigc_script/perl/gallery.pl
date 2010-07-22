@@ -44,7 +44,7 @@
 ###############################################################################
 ################################ Use modules ##################################
 ###############################################################################
-use warnings;
+#use warnings;
 use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
 use File::Copy;
@@ -58,7 +58,7 @@ use Image::Magick;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '0.16';
+$REVISION = '0.17';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
@@ -236,7 +236,7 @@ die "You have asked the script to create a standalone gallery page WITH lightbox
 
 # Check user specified a correct position for the decription
 if($DESCRIPTION){
-	die "There is no description file.  Please create the description file under $DIRECTORY/description.txt.  Stopped" unless -f $DIRECTORY . "/description.txt";
+	die "There is no description file.  Please create the description file under $DIRECTORY/description.txt.  Stopped" unless -f $DIRECTORY . "/description.txt" or -f $DESCRIPTION_FILE;
 	die "You have specified an unknown location for the description text.  Valid locations are 'above' and 'below'.  Stopped" unless $DESCRIPTION eq "above" or $DESCRIPTION eq "below";
 }
 
@@ -269,7 +269,6 @@ $INDEX = "$ROOT/$INDEX_FILE";
 $DESCRIPTION_FILE = "$ROOT/description.txt" unless $DESCRIPTION_FILE;
 @dirs = File::Spec->splitdir($ROOT);
 $TITLE = pop(@dirs) unless $TITLE;
-say "TAAAADAAAAAAA $TITLE";
 undef @dirs;
 
 ############ Create directories ############
@@ -343,7 +342,7 @@ foreach $image (@IMAGES){
 	$PWI->Read("$oldimage");
 	my $height = $PWI->Get('height');
 	my $width = $PWI->Get('width');
-	if($width > $height){
+	if($width > $height || $width == $height){
 		my $ratio_main = $BIG_PIXELS / $width;
 		$PWI->Resize(width=>$width * $ratio_main, height=>$height * $ratio_main) if $width > $BIG_PIXELS;
 	}
@@ -361,7 +360,7 @@ foreach $image (@IMAGES){
 	$PWI->Read("$oldimage");
 	$height = $PWI->Get('height');
 	$width = $PWI->Get('width');
-	if($width > $height){
+	if($width > $height || $width == $height){
 		my $ratio_main = $THUMB_PIXELS / $width;
 		$PWI->Resize(width=>$width * $ratio_main, height=>$height * $ratio_main) if $width > $THUMB_PIXELS;
 	}
@@ -413,7 +412,7 @@ $htmlheader = "$htmlheader" . "\n<head>\n<meta httpequiv='Content-Type' content=
 $markup = "$scriptheader" . "$htmlheader";
 
 if($TITLE){
-	$markup = "$markup" . "<h1>$TITLE</h1>\n\n";
+	$markup .= "<h1>$TITLE</h1>\n\n";
 }
 
 $DESCRIPTION = "" unless $DESCRIPTION;
@@ -421,23 +420,23 @@ if($DESCRIPTION eq "above"){
 	open(DESCRIPTIONFILEHANDLE,"$DESCRIPTION_FILE") or die "Cannot open $DESCRIPTION_FILE.  Stopped";
 	while(<DESCRIPTIONFILEHANDLE>){
 		chomp;
-		$markup = "$markup" . "$_";
+		$markup .= "$_";
 	}
 	close(DESCRIPTIONFILEHANDLE);
 }
 
-$markup = "$markup" . "<div id='gallery-body'>\n\n";
+$markup .= "<div id='gallery-body'>\n\n";
 
 $x = 0;
 while($x < @IMAGES){
-	$markup = "$markup" . "<div class='gallery-column'>\n\n";
+	$markup .= "<div class='gallery-column'>\n\n";
 	
 	for(my $i = 0; $i <= $COLUMNS; $i++){
 		if($x >= @IMAGES){
 			last;
 		}
 		
-		$markup = "$markup" . "<div id='gallery-image'>\n\n";
+		$markup .= "<div id='gallery-image'>\n\n";
 		
 		if($RELATIVE){
 			$bigpath = File::Spec->abs2rel($BIGS, $RELATIVE);
@@ -448,17 +447,15 @@ while($x < @IMAGES){
 		}
 		
 		$PWI = new Image::Magick;
-		$PWI->Read("$thumbpath/$IMAGES[$x]");
+		$PWI->Read("$THUMBS/$IMAGES[$x]");
 		
-		say "$IMAGES[$x]";
-		
-		$height = $PWI->Get('height');
-		$width = $PWI->Get('width');
+		my $height = $PWI->Get('height');
+		my $width = $PWI->Get('width');
 		
 		if($width > $height){
-			$class = "class='landscape";
+			$class = "class='landscape'";
 		}else{
-			$class = "class='portrait";
+			$class = "class='portrait'";
 		}
 		
 		if($LIGHTBOX){
@@ -468,43 +465,43 @@ while($x < @IMAGES){
 			$rel = "rel='lightbox $TITLE'";
 		}
 		
-		$markup = "$markup" . "a href='$bigpath/$IMAGES[$x]' $rel><img $class  alt='$IMAGES[$x]' src='$thumbpath/$IMAGES[$x]' /></a>\n";
+		$markup .= "<a href='$bigpath/$IMAGES[$x]' $rel><img $class alt='$IMAGES[$x]' src='$thumbpath/$IMAGES[$x]' /></a>\n";
 		
 		if($CAPTIONS){
 			my $caption = $IMAGES[$x];
 			$caption =~ s/(.*)\.([^\.]*)/$1/;
-			$markup = "$markup" . "<p class='gallery-caption'>$caption</p>\n";
+			$markup .= "<p class='gallery-caption'>$caption</p>\n";
 		}
 		
-		$markup = "$markup" . "</div>\n\n";
+		$markup .= "</div>\n\n";
 		
 		$x++;
 	}
 	
-	$markup = "$markup" . "</div>\n\n";
+	$markup .= "</div>\n\n";
 }
 
-$markup = "$markup" . "</div>\n\n";
+$markup .= "</div>\n\n";
 
 if($DESCRIPTION eq "below"){
 	open(DESCRIPTIONFILEHANDLE,"$DESCRIPTION_FILE") or die "Cannot open $DESCRIPTION_FILE.  Stopped";
 	while(<DESCRIPTIONFILEHANDLE>){
 		chomp;
-		$markup = "$markup" . "$_";
+		$markup .= "$_";
 	}
 	close(DESCRIPTIONFILEHANDLE);
 }
 
 if($FULL_HTML){
-	$markup = "$markup" . "</body>";
-	$markup = "$markup" . "</html>";
+	$markup .= "</body>";
+	$markup .= "</html>";
 }
 
 ############ Print index file ############
 unless($QUIET){
 	say "Printing the index file";
 }
-open(INDEXFILEHANDLE, ">", "$INDEX_FILE") or die "Cannot open $INDEX_FILE.  Stopped";
+open(INDEXFILEHANDLE, ">", "$INDEX") or die "Cannot open $INDEX.  Stopped";
 select INDEXFILEHANDLE;
 $| = 1;
 select STDOUT;
