@@ -1,0 +1,211 @@
+'\" t
+.\"     Title: gallery
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: 07/25/2010
+.\"    Manual: \ \&
+.\"    Source: \ \&
+.\"  Language: English
+.\"
+.TH "GALLERY" "1" "07/25/2010" "\ \&" "\ \&"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+gallery \- Generates a gallery of images\&.
+.SH "SYNOPSIS"
+.sp
+\fBgallery\fR [\fIoptions\fR] \fId directory\fR
+.SH "DESCRIPTION"
+.sp
+The gallery command will generate a gallery of images\&. Pass it a directory full of images and it will resize them and format an HTML file to display the images\&.
+.sp
+The script creates three directories in the directory passed to it: \fIbigs\fR which stores the larger images for the gallery, \fIthumbs\fR which contain thumbnails of the images, and \fI\&.store\fR which is used to store images while the script is executing, it is deleted after the gallery has been created \&. The script uses \fBImageMagick\fR and \fBPerlMagick\fR to manipulate the images in the gallery\&. After resizing, the script formats a file called \fIindex\fR\&.\fBEXTENSION\fR (\fIindex\&.php\fR by default)\&.
+.sp
+The script uses some specific CSS \fIid\fR and \fIclass\fR attributes\&. These attributes are as follows:
+.sp
+\fI"id=\fR\fI\fIgallery\-body\fR\fR\fI"\fR This is a div that encompasses the entire gallery
+.sp
+\fI"class=\fR\fI\fIgallery\-column\fR\fR\fI"\fR This is a div which encompasses a \fBROW\fR of images\&. By default there are four images per \fIgallery\-column\fR, but the user may specify otherwise\&. This is placed inside the \fIgallery\-body\fR div\&.
+.sp
+\fI"class=\fR\fI\fIgallery\-image\fR\fR\fI"\fR This is a div that encompasses a single image and is placed inside the \fIgallery\-column\fR div\&.
+.sp
+\fI"class=\fR\fI\fIgallery\-caption\fR\fR\fI"\fR This is a paragraph which includes the caption text of your image\&. This is placed inside the \fIgallery\-image\fR div, underneath the image\&.
+.SH "OPTIONS"
+.PP
+\fB\-B, \-\-big_size\fR=\fIbig_image_size_in_pixels\fR
+.RS 4
+The size of the main images\&. The number is applied to the longest side and is measured in pixels\&.
+.RE
+.PP
+\fB\-c, \-\-columns\fR=\fInumber_of_columns\fR
+.RS 4
+Number of columns per row\&. Default is four\&.
+.RE
+.PP
+\fB\-C, \-\-captions\fR
+.RS 4
+Use captions \- These are generated using the file names without the file extension\&.
+.RE
+.sp
+\fB\-d, \-\-gallery_directory\fR=\fIgallery_directory\fR: Absolute link to directory with images in\&. Escape spaces with a \e symbol\&.
+.PP
+\fB\-D, \-\-description_location\fR=\fIdescription_location\fR
+.RS 4
+Add the description found in
+\fIdescription\&.txt\fR
+which should be located in the directory specified with \-d\&.
+.RE
+.PP
+\fB\-\-description_file\fR=\fIdescription_file\fR
+.RS 4
+Specify a file where the description text can be found\&.
+.RE
+.PP
+\fB\-e, \-\-extension\fR=\fIextension\fR
+.RS 4
+Extension for the gallery file\&. Default is php\&.
+.RE
+.PP
+\fB\-h, \-?, \-\-help\fR
+.RS 4
+Displays help text\&.
+.RE
+.PP
+\fB\-H, \-\-standalone_html_version\fR=\fIhtml_version\fR
+.RS 4
+Create a standalone HTML page\&. Specify HTML4\&.01, XHTML101, or XHTML1\&.1 to make the script generate a standalone, standards compliant page\&.
+.RE
+.PP
+\fB\-l\fR
+.RS 4
+Add the "rel" tag to all of the links to use LightBox for displaying images\&.
+.RE
+.PP
+\fB\-L\fR
+.RS 4
+Add the "rel" tag to all of the links to use LightBox groups for displaying images\&. The group name is based on the gallery title, so this option should only be used with \-t "title" or \-T\&.
+.RE
+.PP
+\fB\-q, \-\-quiet\fR
+.RS 4
+Be quiet\&. Suppress all output\&. By default the script is very willing to give information about what it is doing\&.
+.RE
+.PP
+\fB\-r, \-\-relative_to\fR=\fIrelative_directory\fR
+.RS 4
+Directory to that the links should be relative to\&. Escape spaces with a \e symbol\&.
+.RE
+.PP
+\fB\-s, \-\-source_directory\fR=\fIsource_directory\fR
+.RS 4
+Use this directory as a source for images\&. Images will be copied from here into the directory
+.RE
+.PP
+\fB\-S, \-\-thumb_size\fR=\fIsmall_image_size_in_pixels\fR
+.RS 4
+The size of the thumbnail images\&. The number is applied to the longest side and is measured in pixels\&.
+.RE
+.PP
+\fB\-t\fR \fItitle\fR
+.RS 4
+Title of the gallery\&. Quote when using spaces\&.
+.RE
+.PP
+\fB\-T\fR
+.RS 4
+Generate a title for the gallery based on directory name\&.
+.RE
+.PP
+\fB\-V\fR
+.RS 4
+Prints the version (revision) number\&.
+.RE
+.SH "EXAMPLES"
+.PP
+\fBgallery \-h\fR
+.RS 4
+Displays help text\&.
+.RE
+.PP
+\fBgallery \-d /tmp/example\fR
+.RS 4
+Script assumes that
+\fI/tmp/example\fR
+is a directory full of images\&. These images will be manipulated to the right size and placed into folders\&. An index page will be created with HTML markup for displaying the images\&.
+.RE
+.PP
+\fBgallery \-r /tmp/mySite \-d /tmp/mySite/gallery/example\fR
+.RS 4
+This will generate a gallery with images that are relative to
+\fI/tmp/mySite\&.\fR
+For example:
+\fB<a href=\fR\fB\fI\&.\&./\&.\&./mySite/gallery/example/IMG_9313\&.JPG\fR\fR\fB>\fR
+.RE
+.PP
+\fBgallery \-s ~/Photos/Album/My\ee Web\ee Album \-d /web/mySite/gallery/example\fR
+.RS 4
+This will copy all of the images from
+\fI~/Photos/Album/My\ee Web\ee Album\fR
+to the
+\fI/web/mySite/gallery/example\fR
+directory\&. It will then process the script as usual\&. This option still works with the \-r option\&.
+.RE
+.PP
+\fBgallery \-t "My Gallery" \-d /tmp/example\fR
+.RS 4
+Will give the gallery the title
+\fBMy Gallery\fR\&.
+.RE
+.PP
+\fBgallery \-T \-d /tmp/example\fR
+.RS 4
+The gallery will get the title
+\fBexample\fR\&.
+.RE
+.PP
+\fBgallery \-LT \-d /tmp/example\fR
+.RS 4
+The gallery will get the title
+\fBexample\fR
+and will be grouped for viewing with LightBox using the same title\&.
+
+For example:
+\fB<a href=\fR\fB\fIexample/IMG_9317\&.JPG\fR\fR\fB rel=\fR\fB\fIlightbox[example]\fR\fR\fB>\fR
+.RE
+.PP
+\fBgallery \-e "html" \-d /tmp/example\fR
+.RS 4
+Will create the file
+\fI/tmp/example/index\&.html\fR\&. The default is index\&.php\&.
+.RE
+.PP
+\fBgallery \-c 5 \-d /tmp/example\fR
+.RS 4
+Will create a gallery with five columns\&.
+.RE
+.PP
+\fBgallery \-Tl \-r /Users/benlavery/Sites/hashbang0 \-d /Users/benlavery/Sites/hashbang0/gallery/My\e Holiday\fR
+.RS 4
+This is an example of the command I use for creating galleries for my own site\&. Notice how spaces in the path are escaped with a \e\&.
+.RE
+.SH "BUGS"
+.sp
+There is currently zero support for LightBox in a standalone gallery\&.
+.SH "AUTHOR"
+.sp
+Ben Lavery <ben\&.lavery@gmail\&.com>
+.SH "COPYING AND LICENSING"
+.sp
+This document is licensed under the Creative Commons 3\&.0 BY\-SA license, \fBthis allows you to\fR: Copy, distribute, and transmit this document\&. Adapt this document
+.sp
+\fBUnder the following conditions\fR: You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work)\&. If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one\&.
+.sp
+You can find this license here: http://creativecommons\&.org/licenses/by\-sa/3\&.0/

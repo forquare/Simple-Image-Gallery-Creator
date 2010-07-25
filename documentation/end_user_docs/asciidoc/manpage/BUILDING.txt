@@ -1,0 +1,8 @@
+HOW TO BUILD THE MAN PAGE:
+
+HTML:
+asciidoc -a data-uri gallery.1.txt
+
+ROFF:
+asciidoc -d manpage -b docbook gallery.1.txt
+xsltproc /opt/local/etc/asciidoc/docbook-xsl/manpage.xsl gallery.1.xml

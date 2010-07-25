@@ -1,0 +1,158 @@
+GALLERY(1)
+==========
+
+NAME
+----
+gallery - Generates a gallery of images.
+
+SYNOPSIS
+--------
+*gallery* ['options'] 'd directory'
+
+DESCRIPTION
+-----------
+The gallery command will generate a gallery of images.  Pass it a directory full of images and it will resize them and format an HTML file to display the images.
+
+The script creates three directories in the directory passed to it: _bigs_ which stores the larger images for the gallery, _thumbs_ which contain thumbnails of the images, and _.store_ which is used to store images while the script is executing, it is deleted after the gallery has been created .  The script uses *ImageMagick* and *PerlMagick* to manipulate the images in the gallery.  After resizing, the script formats a file called _index_.*EXTENSION* (_index.php_ by default).
+
+The script uses some specific CSS _id_ and _class_ attributes.  These attributes are as follows:
+
+_"id='gallery-body'"_ + 
+This is a div that encompasses the entire gallery
+
+_"class='gallery-column'"_ + 
+This is a div which encompasses a *ROW* of images.  By default there are four images per 'gallery-column', but the user may specify otherwise.  This is placed inside the 'gallery-body' div.
+
+_"class='gallery-image'"_ + 
+This is a div that encompasses a single image and is placed inside the 'gallery-column' div.
+
+_"class='gallery-caption'"_ + 
+This is a paragraph which includes the caption text of your image.  This is placed inside the 'gallery-image' div, underneath the image.
+
+OPTIONS
+-------
+*-B, --big_size*='big_image_size_in_pixels':: 
+	The size of the main images.  The number is applied to the longest side and is measured in pixels.
+	
+*-c, --columns*='number_of_columns':: 
+	Number of columns per row.  Default is four.
+
+*-C, --captions*:: 
+	Use captions - These are generated using the file names without the file extension.
+
+*-d, --gallery_directory*='gallery_directory':  
+	Absolute link to directory with images in.  Escape spaces with a \ symbol.
+
+*-D, --description_location*='description_location':: 
+	Add the description found in _description.txt_ which should be located in the directory specified with -d.
+
+*--description_file*='description_file':: 
+	Specify a file where the description text can be found.
+	
+*-e, --extension*='extension':: 
+	Extension for the gallery file.  Default is php.
+	
+*-h, -?, --help*:: 
+	Displays help text.
+	
+*-H, --standalone_html_version*='html_version':: 
+	Create a standalone HTML page.  Specify HTML4.01, XHTML101, or XHTML1.1 to make the script generate a standalone, standards compliant page.
+	
+*-l*:: 
+	Add the "rel" tag to all of the links to use LightBox for displaying images.
+
+*-L*:: 
+	Add the "rel" tag to all of the links to use LightBox groups for displaying images. The group name is based on the gallery title, so this option should only be used with -t "title" or -T. 
+
+*-q, --quiet*:: 
+	Be quiet.  Suppress all output.  By default the script is very willing to give information about what it is doing.
+
+*-r, --relative_to*='relative_directory':: 
+	Directory to that the links should be relative to.  Escape spaces with a \ symbol.
+
+*-s, --source_directory*='source_directory':: 
+	Use this directory as a source for images.  Images will be copied from here into the directory
+	
+*-S, --thumb_size*='small_image_size_in_pixels':: 
+	The size of the thumbnail images.  The number is applied to the longest side and is measured in pixels.
+	
+*-t* 'title':: 
+	Title of the gallery.  Quote when using spaces.
+
+*-T*:: 
+	Generate a title for the gallery based on directory name.
+	
+*-V*:: 
+	Prints the version (revision) number.
+
+EXAMPLES
+--------
+*gallery -h*:: 
+Displays help text.
+
+*gallery -d /tmp/example*:: 
+	Script assumes that _/tmp/example_ is a directory full of images.  These images will be manipulated to the right size and placed into folders.  An index page will be created with HTML markup for displaying the images.
+
+*gallery -r /tmp/mySite -d /tmp/mySite/gallery/example*:: 
+	This will generate a gallery with images that are relative to _/tmp/mySite._ + 
+	For example: *<a href='../../mySite/gallery/example/IMG_9313.JPG'>*
+
+*gallery -s ~/Photos/Album/My\e Web\e Album -d /web/mySite/gallery/example*:: 
+	This will copy all of the images from _~/Photos/Album/My\e Web\e Album_ to the _/web/mySite/gallery/example_ directory.  It will then process the script as usual.  This option still works with the -r option.
+
+*gallery -t "My Gallery" -d /tmp/example*:: 
+	Will give the gallery the title *My Gallery*.
+
+*gallery -T -d /tmp/example*::
+	The gallery will get the title *example*.
+
+*gallery -LT -d /tmp/example*:: 
+	The gallery will get the title *example* and will be grouped for viewing with LightBox using the same title. + 
+	For example: *<a href='example/IMG_9317.JPG' rel='lightbox[example]'>*
+
+*gallery -e "html" -d /tmp/example*:: 
+	Will create the file _/tmp/example/index.html_.  The default is index.php.
+
+*gallery -c 5 -d /tmp/example*:: 
+	Will create a gallery with five columns.
+
+*gallery -Tl -r /Users/benlavery/Sites/hashbang0 -d /Users/benlavery/Sites/hashbang0/gallery/My\ Holiday*:: 
+	This is an example of the command I use for creating galleries for my own site.  Notice how spaces in the path are escaped with a \.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+BUGS
+----
+There is currently zero support for LightBox in a standalone gallery.
+
+AUTHOR
+------
+Ben Lavery <ben.lavery@gmail.com>
+
+COPYING AND LICENSING
+---------------------
+This document is licensed under the Creative Commons 3.0 BY-SA license, *this allows you to*: + 
+	Copy, distribute, and transmit this document. + 
+	Adapt this document
+	
+*Under the following conditions*: + 
+	You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work). + 
+	 If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+	
+You can find this license here:
+http://creativecommons.org/licenses/by-sa/3.0/
