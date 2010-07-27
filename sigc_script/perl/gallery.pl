@@ -45,12 +45,6 @@
 ################################ Use modules ##################################
 ###############################################################################
 #use warnings;
-use CPAN;
-##################
-# Try installing things first
-CPAN::install("Image::Magick");
-##################
-
 use 5.010;
 use Getopt::Long qw(:config no_ignore_case bundling);
 use File::Copy;
