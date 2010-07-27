@@ -46,11 +46,33 @@
 ###############################################################################
 #use warnings;
 use 5.010;
-use Getopt::Long qw(:config no_ignore_case bundling);
-use File::Copy;
-use File::Basename;
-use File::Spec;
-use Image::Magick;
+use CPAN;
+
+eval{use Getopt::Long qw(:config no_ignore_case bundling);};
+if($@){
+	CPAN::install("Getopt::Long");
+}
+
+eval{use File::Copy;};
+if($@){
+	CPAN::install("File::Copy");
+}
+
+eval{use File::Basename;};
+if($@){
+	CPAN::install("File::Basename");
+}
+
+eval{use File::Spec;};
+if($@){
+	CPAN::install("File::Spec");
+}
+
+eval{use Image::Magick;};
+if($@){
+	CPAN::install("Image::Magick");
+}
+
 ###############################################################################
 
 
