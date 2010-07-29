@@ -1,0 +1,23 @@
+package sigc;
+
+public class Gallery {
+	
+	
+	
+	public Gallery(String[] arguments){
+		
+	}
+	
+	private void sortArguments(String[] arguments){
+		
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		
+
+	}
+
+}

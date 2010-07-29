@@ -1,0 +1,23 @@
+package sigc;
+
+import java.util.Hashtable;
+
+public class Gallery {
+	
+	public Gallery(String[] arguments){
+		
+	}
+	
+	private void sortArguments(String[] arguments){
+		Hashtable<String, String> arguments = new Hashtable<String, String>();
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		
+
+	}
+
+}

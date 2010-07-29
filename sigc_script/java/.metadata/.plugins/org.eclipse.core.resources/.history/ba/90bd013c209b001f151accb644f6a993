@@ -1,0 +1,10 @@
+package sigc;
+
+import sigc.ui.CommandLineInterface;
+import sigc.ui.GeneralGUI;
+
+public class Controller {
+	
+	public Controller(UserInterface)
+
+}

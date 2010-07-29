@@ -1,0 +1,60 @@
+package bil6.gui;
+
+
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
+import javax.swing.JFrame;
+
+/**
+ * Provides a simple set of methods for
+ * setting up frames.
+ * 
+ * @author Ben Lavery
+ * @version 21/4/08
+ */
+public abstract class SimpleFrame extends JFrame {
+	
+	private int positionX, positionY;
+
+	/**
+	 * Constructor sets up a window
+	 */
+	public SimpleFrame(){
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setResizable(false);
+	}
+	
+	/**
+	 * Constructor sets up a windows size and to exit when cross is clicked
+	 */
+	public SimpleFrame(int x, int y){
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setResizable(false);
+		this.setSize(x, y);
+	}
+	
+	/**
+	 * Gets the screen size, then makes the window central to the screen.
+	 */
+	public void middle(){
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		positionY = (int) (dim.getHeight() / 2) - (this.getHeight() / 2);
+		positionX = (int) (dim.getWidth() / 2) - (this.getWidth() / 2);
+		this.setLocation(positionX, positionY);
+	}
+
+	/**
+	 * Shows the frame
+	 */
+	public void showIt() {
+		this.setVisible(true);
+	}
+
+	/**
+	 * Hides the frame
+	 */
+	public void hideIt() {
+		this.setVisible(false);
+	}
+}

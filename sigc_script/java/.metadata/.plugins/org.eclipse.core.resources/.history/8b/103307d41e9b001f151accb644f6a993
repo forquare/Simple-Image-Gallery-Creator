@@ -1,0 +1,38 @@
+package sigc;
+
+import java.util.Hashtable;
+import sigc.ui.CommandLineInterface;
+import sigc.ui.GeneralGUI;
+
+public class Gallery {
+	
+	private Hashtable<String, String> arguments;
+	private Controller controller;
+	private CommandLineInterface cli;
+	private GeneralGUI gui;
+	
+	public Gallery(String[] args){
+		sortArguments(args);
+		
+		controller = new Controller();
+		//If argument 
+	}
+	
+	private Hashtable<String, String> sortArguments(String[] args){
+		int MAX_INT = 19;
+		arguments = new Hashtable<String, String>(MAX_INT);
+		
+		//Do some sorting here
+		
+		return arguments;
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		
+
+	}
+
+}
