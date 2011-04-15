@@ -58,7 +58,7 @@ use Image::Magick;
 ################################ "Global" variables ###########################
 ###############################################################################
 #### SCRIPT VERSION ####
-$REVISION = '1.0';
+$REVISION = '1.1';
 
 #### FILE SETTINGS ####
 $INDEX_EXTENTION = "php";
