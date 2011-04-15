@@ -407,7 +407,13 @@ if($FULL_HTML eq $XHTML11){
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">';
 }
 
-$htmlheader = "$htmlheader" . "\n<head>\n<meta httpequiv='Content-Type' content='text/html; charset=utf-8'/>\n<title>$TITLE</title>\n</head>\n<body>\n\n";
+if($FULL_HTML){
+	$htmlheader = "$htmlheader" . "\n<head>\n<meta httpequiv='Content-Type' content='text/html; charset=utf-8'/>\n<title>$TITLE</title>\n</head>\n<body>\n\n";
+}else{
+	$htmlheader = "";
+}
+
+
 
 $markup = "$scriptheader" . "$htmlheader";
 
